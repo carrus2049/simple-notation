@@ -315,7 +315,7 @@ export class SNNote extends SNBox {
         text: graceNote.note,
         fontSize: 12,
         fontFamily:
-          '"SimSun", "STSong", "STFangsong", "FangSong", "FangSong_GB2312", "KaiTi", "KaiTi_GB2312", "STKaiti", "AR PL UMing CN", "AR PL UMing HK", "AR PL UMing TW", "AR PL UMing TW MBE", "WenQuanYi Micro Hei", serif',
+          '"微软雅黑", "SimSun", "STSong", "STFangsong", "FangSong", "FangSong_GB2312", "KaiTi", "KaiTi_GB2312", "STKaiti", "AR PL UMing CN", "AR PL UMing HK", "AR PL UMing TW", "AR PL UMing TW MBE", "WenQuanYi Micro Hei", serif',
         textAnchor: 'start',
         strokeWidth: 1,
       });
@@ -384,7 +384,7 @@ export class SNNote extends SNBox {
           text: '(',
           fontSize,
           fontFamily:
-            '"SimSun", "STSong", "STFangsong", "FangSong", "FangSong_GB2312", "KaiTi", "KaiTi_GB2312", "STKaiti", "AR PL UMing CN", "AR PL UMing HK", "AR PL UMing TW", "AR PL UMing TW MBE", "WenQuanYi Micro Hei", serif',
+            '"微软雅黑", "SimSun", "STSong", "STFangsong", "FangSong", "FangSong_GB2312", "KaiTi", "KaiTi_GB2312", "STKaiti", "AR PL UMing CN", "AR PL UMing HK", "AR PL UMing TW", "AR PL UMing TW MBE", "WenQuanYi Micro Hei", serif',
           textAnchor: 'middle',
           strokeWidth: 1,
         }),
@@ -399,7 +399,7 @@ export class SNNote extends SNBox {
           text: ')',
           fontSize,
           fontFamily:
-            '"SimSun", "STSong", "STFangsong", "FangSong", "FangSong_GB2312", "KaiTi", "KaiTi_GB2312", "STKaiti", "AR PL UMing CN", "AR PL UMing HK", "AR PL UMing TW", "AR PL UMing TW MBE", "WenQuanYi Micro Hei", serif',
+            '"微软雅黑", "SimSun", "STSong", "STFangsong", "FangSong", "FangSong_GB2312", "KaiTi", "KaiTi_GB2312", "STKaiti", "AR PL UMing CN", "AR PL UMing HK", "AR PL UMing TW", "AR PL UMing TW MBE", "WenQuanYi Micro Hei", serif',
           textAnchor: 'middle',
           strokeWidth: 1,
         }),
@@ -437,7 +437,7 @@ export class SNNote extends SNBox {
           text: this.note,
           fontSize: 12,
           fontFamily:
-            '"SimSun", "STSong", "STFangsong", "FangSong", "FangSong_GB2312", "KaiTi", "KaiTi_GB2312", "STKaiti", "AR PL UMing CN", "AR PL UMing HK", "AR PL UMing TW", "AR PL UMing TW MBE", "WenQuanYi Micro Hei", serif',
+            '"微软雅黑", "SimSun", "STSong", "STFangsong", "FangSong", "FangSong_GB2312", "KaiTi", "KaiTi_GB2312", "STKaiti", "AR PL UMing CN", "AR PL UMing HK", "AR PL UMing TW", "AR PL UMing TW MBE", "WenQuanYi Micro Hei", serif',
           textAnchor: 'middle',
           strokeWidth: 1,
           stroke: this.isError ? 'red' : 'black',
@@ -469,7 +469,7 @@ export class SNNote extends SNBox {
             text: multiNote.note,
             fontSize: 12,
             fontFamily:
-              '"SimSun", "STSong", "STFangsong", "FangSong", "FangSong_GB2312", "KaiTi", "KaiTi_GB2312", "STKaiti", "AR PL UMing CN", "AR PL UMing HK", "AR PL UMing TW", "AR PL UMing TW MBE", "WenQuanYi Micro Hei", serif',
+              '"微软雅黑", "SimSun", "STSong", "STFangsong", "FangSong", "FangSong_GB2312", "KaiTi", "KaiTi_GB2312", "STKaiti", "AR PL UMing CN", "AR PL UMing HK", "AR PL UMing TW", "AR PL UMing TW MBE", "WenQuanYi Micro Hei", serif',
             textAnchor: 'middle',
             strokeWidth: 1,
             stroke: this.isError ? 'red' : 'black',
@@ -484,7 +484,7 @@ export class SNNote extends SNBox {
             text: '.',
             fontSize: 18,
             fontFamily:
-              '"SimSun", "STSong", "STFangsong", "FangSong", "FangSong_GB2312", "KaiTi", "KaiTi_GB2312", "STKaiti", "AR PL UMing CN", "AR PL UMing HK", "AR PL UMing TW", "AR PL UMing TW MBE", "WenQuanYi Micro Hei", serif',
+              '"微软雅黑", "SimSun", "STSong", "STFangsong", "FangSong", "FangSong_GB2312", "KaiTi", "KaiTi_GB2312", "STKaiti", "AR PL UMing CN", "AR PL UMing HK", "AR PL UMing TW", "AR PL UMing TW MBE", "WenQuanYi Micro Hei", serif',
             textAnchor: 'middle',
             strokeWidth: 1,
             stroke: this.isError ? 'red' : 'black',
@@ -505,7 +505,7 @@ export class SNNote extends SNBox {
           text: this.note,
           fontSize: 18,
           fontFamily:
-            '"SimSun", "STSong", "STFangsong", "FangSong", "FangSong_GB2312", "KaiTi", "KaiTi_GB2312", "STKaiti", "AR PL UMing CN", "AR PL UMing HK", "AR PL UMing TW", "AR PL UMing TW MBE", "WenQuanYi Micro Hei", serif',
+            '"微软雅黑", "SimSun", "STSong", "STFangsong", "FangSong", "FangSong_GB2312", "KaiTi", "KaiTi_GB2312", "STKaiti", "AR PL UMing CN", "AR PL UMing HK", "AR PL UMing TW", "AR PL UMing TW MBE", "WenQuanYi Micro Hei", serif',
           textAnchor: 'middle',
           strokeWidth: 1,
           stroke: this.isError ? 'red' : 'black',
@@ -519,7 +519,7 @@ export class SNNote extends SNBox {
             text: '.',
             fontSize: 18,
             fontFamily:
-              '"SimSun", "STSong", "STFangsong", "FangSong", "FangSong_GB2312", "KaiTi", "KaiTi_GB2312", "STKaiti", "AR PL UMing CN", "AR PL UMing HK", "AR PL UMing TW", "AR PL UMing TW MBE", "WenQuanYi Micro Hei", serif',
+              '"微软雅黑", "SimSun", "STSong", "STFangsong", "FangSong", "FangSong_GB2312", "KaiTi", "KaiTi_GB2312", "STKaiti", "AR PL UMing CN", "AR PL UMing HK", "AR PL UMing TW", "AR PL UMing TW MBE", "WenQuanYi Micro Hei", serif',
             textAnchor: 'middle',
             strokeWidth: 1,
             stroke: this.isError ? 'red' : 'black',
@@ -569,7 +569,7 @@ export class SNNote extends SNBox {
                 text: note.note,
                 fontSize: 12,
                 fontFamily:
-                  '"SimSun", "STSong", "STFangsong", "FangSong", "FangSong_GB2312", "KaiTi", "KaiTi_GB2312", "STKaiti", "AR PL UMing CN", "AR PL UMing HK", "AR PL UMing TW", "AR PL UMing TW MBE", "WenQuanYi Micro Hei", serif',
+                  '"微软雅黑", "SimSun", "STSong", "STFangsong", "FangSong", "FangSong_GB2312", "KaiTi", "KaiTi_GB2312", "STKaiti", "AR PL UMing CN", "AR PL UMing HK", "AR PL UMing TW", "AR PL UMing TW MBE", "WenQuanYi Micro Hei", serif',
                 textAnchor: 'middle',
                 strokeWidth: 1,
                 stroke: this.isError ? 'red' : 'black',
@@ -808,8 +808,7 @@ export class SNNote extends SNBox {
             y: baseY,
             text: word,
             fontSize: 14,
-            fontFamily:
-              '"SimSun", "STSong", "STFangsong", "FangSong", "FangSong_GB2312", "KaiTi", "KaiTi_GB2312", "STKaiti", "AR PL UMing CN", "AR PL UMing HK", "AR PL UMing TW", "AR PL UMing TW MBE", "WenQuanYi Micro Hei", serif',
+            fontFamily: '"Microsoft YaHei", "微软雅黑", "PingFang SC", "Heiti SC", "WenQuanYi Micro Hei", sans-serif', 
             textAnchor: 'middle',
           });
           this.el.appendChild(text);
@@ -823,8 +822,7 @@ export class SNNote extends SNBox {
               y: baseY + drawIdx * 15,
               text: line,
               fontSize: 14,
-              fontFamily:
-                '"SimSun", "STSong", "STFangsong", "FangSong", "FangSong_GB2312", "KaiTi", "KaiTi_GB2312", "STKaiti", "AR PL UMing CN", "AR PL UMing HK", "AR PL UMing TW", "AR PL UMing TW MBE", "WenQuanYi Micro Hei", serif',
+              fontFamily: '"Microsoft YaHei", "微软雅黑", "PingFang SC", "Heiti SC", "WenQuanYi Micro Hei", sans-serif', 
               textAnchor: 'middle',
             });
             this.el.appendChild(text);

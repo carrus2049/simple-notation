@@ -101,7 +101,7 @@ export class SNMeasure extends SNBox {
     const yOffset = SNConfig.score.chordHeight;
     this.el.appendChild(
       SvgUtils.createText({
-        text: `${this.index + 1}`,
+        text: `${this.index +1}`,
         x: this.x - SNStave.BAR_LINE_WIDTH,
         y: this.y + yOffset + 8,
         fontSize: 10,
@@ -123,7 +123,7 @@ export class SNMeasure extends SNBox {
    * 5. 创建并渲染音符
    */
   draw() {
-    this.drawCount();
+    // this.drawCount();
     const unitWidth = this.innerWidth / this.weight;
     let totalX = this.innerX;
     this.noteOptions.forEach((option) => {

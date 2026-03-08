@@ -227,15 +227,16 @@ export class SNInfo extends SNBox {
     if (tempo) {
       const tempoLine = SvgUtils.createTspan({
         x: this.innerX,
-        dy: '-10',
+        dy: '30',
       });
-      tempoLine.appendChild(
-        UnicodeMusicSymbols.createSymbol('QUARTER_NOTE', {
-          x: this.innerX,
-          y: this.innerY + this.innerHeight - 20,
-          fontSize: 18,
-        }),
-      );
+      // 创建四分音符符号的 tspan（不带 x/y，因为它在父 tspan 内）
+      // 使用支持 Musical Symbols Unicode block 的字体
+      const noteSymbol = SvgUtils.createTspan({
+        fontSize: 18,
+        fontFamily: '"Arial Unicode MS", "Times New Roman", "DejaVu Sans", "Bravura", serif',
+        text: UnicodeMusicSymbols.getSymbol('QUARTER_NOTE'),
+      });
+      tempoLine.appendChild(noteSymbol);
       tempoLine.appendChild(
         SvgUtils.createTspan({
           text: ` = ${tempo}`,
