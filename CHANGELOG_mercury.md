@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.0.2] - 2026-03-08
+
+### Added
+- **命令行工具 (CLI)**：新增 `simple-notation` / `sn-pdf` 命令，可将谱面和歌词渲染为 PDF
+  - 支持 JSON 模板文件 (.json) 和 ABC 格式 (.txt)
+  - 谱面：`[score]` 位置参数或 `-s, --score-text` 直接传入文本
+  - 歌词：`-l, --lyrics` 指定文件或 `-y, --lyrics-text` 直接传入
+  - 输出：`-o, --output` 指定 PDF 路径（默认 output.pdf）
+  - 渲染：`-w, --width` 指定宽度（像素，默认 800）
+  - JSON 模板支持 `score_file` / `lyric_file` 引用外部文件
+
+---
+
 ## [0.0.1] - 2026-03-08
 
 ### Changed

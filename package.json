@@ -6,10 +6,12 @@
     "dev:docs": "pnpm --filter docs dev",
     "build:web": "pnpm --filter web build-only",
     "build:lib": "pnpm --filter simple-notation build",
+    "build:cli": "pnpm run build:lib && pnpm --filter simple-notation-cli build",
     "preview:web": "pnpm --filter web preview",
     "test:lib": "pnpm --filter simple-notation test",
     "coverage:lib": "pnpm --filter simple-notation coverage",
-    "deploy:web": "pnpm run build:lib && pnpm run build:web"
+    "deploy:web": "pnpm run build:lib && pnpm run build:web",
+    "pdf": "pnpm run build:cli && node packages/cli/dist/index.js"
   },
   "devDependencies": {
     "eslint": "^9.22.0",

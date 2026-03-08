@@ -1,8 +1,16 @@
 /**
- * 用于渲染内容的数据类型，可以是模板对象或字符串。
- * @typedef {SNTemplate | string} SNData
+ * ABC 格式数据，支持单独传入歌词。
  */
-export type SNData = SNTemplate | string;
+export interface SNAbcData {
+  score: string;
+  lyric?: string;
+}
+
+/**
+ * 用于渲染内容的数据类型，可以是模板对象、ABC 字符串或 ABC 对象。
+ * @typedef {SNTemplate | string | SNAbcData} SNData
+ */
+export type SNData = SNTemplate | string | SNAbcData;
 
 /**
  * 简谱模板对象。

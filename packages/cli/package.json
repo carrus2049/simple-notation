@@ -1,0 +1,23 @@
+{
+  "name": "simple-notation-cli",
+  "version": "1.0.0",
+  "type": "module",
+  "bin": {
+    "simple-notation": "./dist/index.js",
+    "sn-pdf": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "run": "node dist/index.js"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "puppeteer": "^23.6.0",
+    "simple-notation": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "typescript": "~5.8.3"
+  }
+}

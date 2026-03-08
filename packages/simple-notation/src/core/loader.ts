@@ -23,27 +23,33 @@ export class SNLoader {
     Logger.debug('loadData 加载数据', 'SimpleNotation');
     // 先解析数据，后渲染页面
     if (type === SNDataType.ABC) {
-      SNLoader.loadAbcData(data as string);
+      const abcData = typeof data === 'string' ? { score: data } : data;
+      SNLoader.loadAbcData(abcData.score, abcData.lyric);
     } else {
       SNLoader.loadTemplateData(data as SNTemplate);
     }
   }
 
-  static loadAbcData(data: string) {
+  static loadAbcData(data: string, lyric?: string) {
     const { info, score, parsedScore } = new AbcParser().parse(data);
+    const parsedLyric = (lyric?.replace(/\r/g, '').replaceAll('\n', '') || '').replace(/^\ufeff/, '');
+    let splitLyrics: (string | string[])[] = [];
+    if (parsedLyric) {
+      splitLyrics = SNRuntime.splitLyric(parsedLyric);
+    }
     new SNRuntime({
       info: info!,
       score: score || '',
-      lyric: '',
+      lyric: parsedLyric,
       parsedScore: parsedScore,
-      splitLyrics: [],
+      splitLyrics,
       type: SNDataType.ABC,
     });
   }
 
   static loadTemplateData(data: SNTemplate) {
     const { info, score, lyric } = data;
-    const parsedLyric = lyric?.replaceAll('\n', '') || '';
+    const parsedLyric = (lyric?.replace(/\r/g, '').replaceAll('\n', '') || '').replace(/^\ufeff/, '');
     let splitLyrics: (string | string[])[] = [];
     if (parsedLyric) {
       splitLyrics = SNRuntime.splitLyric(parsedLyric);

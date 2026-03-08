@@ -83,7 +83,8 @@ export class SNScore extends SNBox {
       return;
     }
     let totalY = this.innerY;
-    const pageSize = 870;
+    // A4 纸 297mm，上下边距各 10mm，内容区约 277mm ≈ 1047px (96dpi)
+    const pageSize = 1047;
     let currentPageSize = 0;
     this.staveOptions.forEach((option, idx) => {
       if (option.type !== SNStaveType.DefaultLine) return;
