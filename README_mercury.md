@@ -195,7 +195,26 @@ for (let i = 0; i < pageBreakYPositions.length - 1; i++) {
 pdf.save(`[SimpleNotation]${SNRuntime.info.title || '未命名曲谱'}.pdf`);
 ```
 
-### 使用方式
+### 命令行批量渲染
+
+使用 CLI 的 `batch` 子命令可对 Kraken 生成的 output 目录进行批量 PDF 渲染：
+
+```bash
+# 进入 simple-notation 根目录
+cd simple-notation
+
+# 批量渲染（data_dir 为包含 output 子目录的数据根目录）
+node packages/cli/dist/index.js batch C:\Data\melody_jianpu_notation_gen\batch_3
+
+# 指定渲染宽度（默认 800 像素）
+node packages/cli/dist/index.js batch C:\Data\melody_jianpu_notation_gen\batch_3 -w 1000
+```
+
+- 扫描 `data_dir/output` 下各子目录中的 `{hash}_simple_notation.json`
+- 输出到 `data_dir/rendered_images/{hash}.pdf`
+- 需先执行 `pnpm build:lib` 构建 CLI
+
+### Web 应用使用方式
 
 在 Web 应用中，点击"💾保存pdf"按钮即可触发批量渲染：
 

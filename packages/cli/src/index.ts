@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 import { program } from 'commander';
-import { resolve, dirname } from 'path';
+import { resolve, dirname, join } from 'path';
 import { fileURLToPath } from 'url';
-import { readFileSync, existsSync, mkdirSync, statSync } from 'fs';
+import { readFileSync, existsSync, mkdirSync, statSync, readdirSync } from 'fs';
 import { generatePdf } from './pdf.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -17,6 +17,70 @@ program
 if (process.argv[2] === '--') {
   process.argv.splice(2, 1);
 }
+
+program
+  .command('batch <data_dir>')
+  .description('批量模式：扫描 data_dir/output 下子目录，查找 {hash}_simple_notation.json，渲染到 data_dir/rendered_images/hash.pdf')
+  .option('-w, --width <px>', '渲染宽度（像素）', '800')
+  .action(async (dataDir, options) => {
+    const dataDirAbs = resolve(process.cwd(), dataDir);
+    const outputDir = join(dataDirAbs, 'output');
+    const renderedDir = join(dataDirAbs, 'rendered_images');
+
+    if (!existsSync(outputDir)) {
+      console.error(`错误: output 目录不存在: ${outputDir}`);
+      process.exit(1);
+    }
+
+    const hashDirs = readdirSync(outputDir, { withFileTypes: true })
+      .filter((e) => e.isDirectory())
+      .map((e) => e.name);
+
+    const tasks: { hash: string; jsonPath: string }[] = [];
+    for (const hash of hashDirs) {
+      const jsonPath = join(outputDir, hash, `${hash}_simple_notation.json`);
+      if (existsSync(jsonPath)) {
+        tasks.push({ hash, jsonPath });
+      }
+    }
+
+    if (tasks.length === 0) {
+      console.error('未找到任何 {hash}_simple_notation.json 文件');
+      process.exit(1);
+    }
+
+    mkdirSync(renderedDir, { recursive: true });
+    const width = parseInt(options.width, 10) || 800;
+
+    for (const { hash, jsonPath } of tasks) {
+      const outputPath = join(renderedDir, `${hash}.pdf`);
+      try {
+        let scoreData = readFileSync(jsonPath, 'utf-8');
+        // 与 pdf 命令一致：若 JSON 含 score_file/lyric_file，需解析并加载实际内容
+        const parsed = JSON.parse(scoreData) as Record<string, unknown>;
+        if ('score_file' in parsed && typeof parsed.score_file === 'string') {
+          const jsonDir = dirname(jsonPath);
+          const scoreFilePath = resolve(jsonDir, parsed.score_file as string);
+          const lyricFilePath =
+            'lyric_file' in parsed && typeof parsed.lyric_file === 'string'
+              ? resolve(jsonDir, parsed.lyric_file as string)
+              : null;
+          if (existsSync(scoreFilePath)) {
+            const fullScore = readFileSync(scoreFilePath, 'utf-8');
+            const fullLyric = lyricFilePath && existsSync(lyricFilePath)
+              ? readFileSync(lyricFilePath, 'utf-8')
+              : '';
+            const { score_file, lyric_file, ...rest } = parsed;
+            scoreData = JSON.stringify({ ...rest, score: fullScore, lyric: fullLyric });
+          }
+        }
+        await generatePdf(scoreData, undefined, 'template', outputPath, width, __dirname);
+        console.log(`已渲染: ${hash} -> ${outputPath}`);
+      } catch (err) {
+        console.error(`渲染 ${hash} 失败:`, err);
+      }
+    }
+  });
 
 program
   .argument('[score]', '谱面文件路径或 JSON 模板文件路径（.json/.txt）')

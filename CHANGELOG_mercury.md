@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.0.3] - 2026-03-09
+
+### Added
+- **批量输出工具 (batch)**：新增 `batch <data_dir>` 子命令，扫描 `data_dir/output` 下子目录中的 `{hash}_simple_notation.json`，批量渲染为 PDF 到 `data_dir/rendered_images/{hash}.pdf`
+  - 支持 `-w, --width <px>` 指定渲染宽度（默认 800）
+  - 支持 JSON 模板中的 `score_file` / `lyric_file` 引用外部文件
+
+---
+
 ## [0.0.2] - 2026-03-08
 
 ### Added
