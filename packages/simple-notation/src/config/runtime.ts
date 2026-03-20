@@ -3,6 +3,7 @@ import {
   SNDataType,
   SNRuntimeOptions,
   SNStaveOptions,
+  SNLyricDiffPaint,
 } from '@types';
 
 export class SNRuntime {
@@ -12,6 +13,7 @@ export class SNRuntime {
   static lyric: string;
   static splitLyrics: (string | string[])[] = [];
   static type: SNDataType;
+  static lyricDiffPaint: SNLyricDiffPaint | null = null;
 
   /**
    * 构造函数，根据type选择不同的数据解析方式
@@ -48,6 +50,35 @@ export class SNRuntime {
     SNRuntime.parsedScore = [];
     SNRuntime.lyric = '';
     SNRuntime.splitLyrics = [];
+    SNRuntime.lyricDiffPaint = null;
+  }
+
+  /** 与 web 端歌词 diff 的 stripForCompare 一致：`-`、空白、标点不参与对比 */
+  static stripForLyricCompare(s: string): string {
+    let out = '';
+    for (const c of s || '') {
+      if (c === '-') continue;
+      if (/\s/u.test(c)) continue;
+      if (/\p{P}/u.test(c)) continue;
+      out += c;
+    }
+    return out;
+  }
+
+  static syllableStrippedLength(word: string | string[]): number {
+    if (typeof word === 'string') return SNRuntime.stripForLyricCompare(word).length;
+    return word.map((x) => SNRuntime.stripForLyricCompare(x)).join('').length;
+  }
+
+  /** 当前音符（1-based）对应歌词在合并 strip 串中的起始下标 */
+  static scoreOffsetAtNoteStart(noteIndex1Based: number): number {
+    const splitLyrics = SNRuntime.splitLyrics;
+    const n = Math.max(0, noteIndex1Based - 1);
+    let off = 0;
+    for (let i = 0; i < n && i < splitLyrics.length; i++) {
+      off += SNRuntime.syllableStrippedLength(splitLyrics[i]);
+    }
+    return off;
   }
 
   /**

@@ -12,6 +12,12 @@
       Simple Notation
     </h3>
     <div class="mt-6 flex justify-center space-x-6">
+      <router-link
+        to="/demo"
+        class="inline-flex items-center px-4 py-2 border border-gray-400 text-base font-medium rounded-md text-gray-600 hover:bg-gray-100 transition-colors duration-200"
+      >
+        谱面 Demo
+      </router-link>
       <button>
         <a
           href="https://github.com/Encaik/simple-notation"

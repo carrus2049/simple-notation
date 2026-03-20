@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.0.4] - 2026-03-20
+
+### Added
+- **歌词 diff 上色（模板 + 渲染）**：`SNTemplate` 支持可选字段 `lyricDiffPaint`（`mergedCharStatus`、`colorMap`），`SNLoader` 写入 `SNRuntime.lyricDiffPaint`；`note.ts` 按字分段绘制歌词（`tspan`），对 `extra_in_score`、`diff` 等状态着色；`SNRuntime` 增加与 Web 端一致的 `stripForLyricCompare`、`syllableStrippedLength`、`scoreOffsetAtNoteStart`，用于对齐 strip 后合并串与谱面音节
+- **谱面分页配置**：`SNScoreOptions.pageContentHeightPx` 可选，覆盖默认 A4 内容区高度（约 1047px @96dpi）
+- **播放器 `SNPlayer`**：`reloadNotesFromRuntime()`（`loadData` 后同步内部音符队列，避免与谱面长度不一致）；`getCurrentIndex()`；`setCurrentIndex` 同步累计 `currentTime`；连音线（tie）发声规则：同 pitch 的 tie 组内后续音不重复触发 `onNotePlay`，pitch 变化则照常播放
+- **Web**：路由 `/demo`（`Demo`）；`Header` 增加「谱面 Demo」入口；`Home` 精简为导航 + 进入 Demo 的落地页
+- **Web `usePlayer`**：`reloadPlayerNotesFromRuntime`、`getPlayerCurrentIndex`、`seekToIndex`（播放中 seek 保持 Transport 连续）、`getTimeMsForNoteIndex` / `getNoteIndexForTimeMs`（音频与谱面时间对齐）；`use/index` 导出 `useDemoData`、`useAudioSync`
+- **Web 依赖与构建**：`diff`、`jszip`；`env.d.ts` 声明 `diff` 模块；`vite.config` 将 `/api/demo` 代理到 `http://localhost:8000`（路径重写为后端根路径）
+- **CLI PDF（Puppeteer）**：未设置 `PUPPETEER_EXECUTABLE_PATH` 时自动探测 macOS / Linux 常见 Chrome/Chromium 路径；找不到系统浏览器时给出警告并尝试使用 Puppeteer 自带 Chromium；捕获「Could not find Chrome」并输出可操作的解决提示
+
+### Changed
+- **`SvgUtils.createTspan`**：`font-size` / `font-family` / `font-weight` / `fill` / `text-anchor` 仅在传入时写入，避免子 `tspan` 覆盖父 `<text>` 的锚点与样式（多段上色歌词居中）
+- **`usePlayer` 移调与发声**：旋律与和弦向 `playNote` 传入的音名与内部移调逻辑对齐，避免重复移调导致音高错误
+
+### Fixed
+- **CLI PDF**：生成流程用 `try/finally` 确保关闭 browser，并在成功路径的 `finally` 中关闭本地静态 server，避免泄漏
+- **播放器**：`loadData` 更新 `SNRuntime.parsedScore` 后内部 `notes` 未刷新导致 seek / 时间计算异常的问题（通过 `reloadNotesFromRuntime` 与 Web 侧调用配合修复）
+
+---
+
 ## [0.0.3] - 2026-03-09
 
 ### Added

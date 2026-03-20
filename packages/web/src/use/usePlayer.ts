@@ -90,12 +90,91 @@ export function usePlayer() {
     teardownPlayerListeners(); // 新player前移除监听
   };
 
+  /** loadData 更新 SNRuntime 后同步 SNPlayer 内音符队列（与谱面一致） */
+  const reloadPlayerNotesFromRuntime = () => {
+    player.value?.reloadNotesFromRuntime();
+  };
+
   const setCurrentIndex = (index: number) => {
     player.value?.setCurrentIndex(index);
   };
 
+  const getPlayerCurrentIndex = () => {
+    return player.value?.getCurrentIndex() ?? 0;
+  };
+
+  /**
+   * 跳转到指定音符位置（用于点击谱面跳转）
+   * 若当前正在播放：仅重置 SNPlayer 内部进度并保持播放，不改变 playState / Transport
+   */
+  const seekToIndex = async (noteIndex: number) => {
+    const idx = noteIndex - 1; // 转为 0-based 数组索引
+    if (idx < 0) return;
+
+    const notes = player.value?.getNotes() ?? [];
+    if (notes.length === 0) {
+      await init();
+    }
+    const notesAfter = player.value?.getNotes() ?? [];
+    if (idx >= notesAfter.length) return;
+
+    if (playState.value === 'playing') {
+      player.value?.pause();
+      setCurrentIndex(idx);
+      SNPointerLayer.showPointer(`note-${noteIndex}`);
+      player.value?.resume();
+    } else {
+      setCurrentIndex(idx);
+      SNPointerLayer.showPointer(`note-${noteIndex}`);
+    }
+  };
+
   const getNotes = () => {
     return player.value?.getNotes() || [];
+  };
+
+  /**
+   * 根据音符索引计算对应的播放时间（毫秒），用于与音频同步 seek
+   */
+  const getTimeMsForNoteIndex = (noteIndex: number): number => {
+    const idx = noteIndex - 1;
+    if (idx < 0) return 0;
+    const notes = player.value?.getNotes() ?? [];
+    if (idx >= notes.length) {
+      console.warn(
+        '[player] getTimeMsForNoteIndex 越界，将按 0ms seek（多为 loadData 后未同步 SNPlayer 音符）',
+        { noteIndex, notesLen: notes.length },
+      );
+      return 0;
+    }
+    const tempo = Number(SNRuntime.info?.tempo) || 60;
+    const beatDuration = 60000 / tempo;
+    let timeMs = 0;
+    for (let i = 0; i < idx; i++) {
+      const note = notes[i];
+      const nodeTime = note?.nodeTime ?? 1;
+      timeMs += nodeTime * beatDuration;
+    }
+    return timeMs;
+  };
+
+  /**
+   * 根据时间（毫秒）计算对应的音符索引（1-based），用于音频 seek 时同步谱面
+   */
+  const getNoteIndexForTimeMs = (timeMs: number): number => {
+    const notes = player.value?.getNotes() ?? [];
+    if (notes.length === 0) return 1;
+    const tempo = Number(SNRuntime.info?.tempo) || 60;
+    const beatDuration = 60000 / tempo;
+    let acc = 0;
+    for (let i = 0; i < notes.length; i++) {
+      const note = notes[i];
+      const nodeTime = note?.nodeTime ?? 1;
+      const dur = nodeTime * beatDuration;
+      if (timeMs < acc + dur) return i + 1;
+      acc += dur;
+    }
+    return notes.length;
   };
 
   const pianoStore = usePianoStore();
@@ -140,11 +219,10 @@ export function usePlayer() {
           clearAllHighlightsAndTimers(); // 清除所有，包括可能的和弦高亮
         } else if (noteName && isMelodyActive.value) {
           // 如果是有效的旋律音符且旋律功能激活
-          const midi = noteNameToMidi(noteName); // 获取音符的 MIDI 值
-          // 应用移调后获取实际播放的音名
-          const playNoteName = midiToNoteName(midi + transpose.value);
-          playNote(playNoteName, duration * 0.001); // 播放音符
-          currentMainKeyMidi = midi + transpose.value; // 记录当前播放的移调后的主音 MIDI
+          const midi = noteNameToMidi(noteName); // 获取音符的 MIDI 值（C 调基准）
+          // playNote 内部会应用 transpose，故传入未移调的音名
+          playNote(noteName, duration * 0.001);
+          currentMainKeyMidi = midi + transpose.value; // 记录当前播放的移调后的主音 MIDI（用于高亮）
 
           // 设置旋律高亮并安排清除
           pianoStore.setHighlightMidis([currentMainKeyMidi]);
@@ -186,12 +264,10 @@ export function usePlayer() {
           // 和弦释放额外时长，用于模拟扫弦效果
           const chordReleaseExtra = 0.15;
 
-          // 播放所有收集到的音符（去重）
+          // 播放所有收集到的音符（去重）。和弦为绝对音高，传入未移调音名供 playNote 内部应用 transpose
           Array.from(new Set(allNotesToPlay)).forEach((noteToPlay) => {
-            // 应用移调后播放音符
             const midi = noteNameToMidi(noteToPlay);
-            const playNoteName = midiToNoteName(midi + transpose.value);
-            playNote(playNoteName, duration * 0.001 + chordReleaseExtra);
+            playNote(midiToNoteName(midi - transpose.value), duration * 0.001 + chordReleaseExtra);
           });
 
           // 安排和弦高亮在持续时间后清除
@@ -349,8 +425,13 @@ export function usePlayer() {
     resume,
     stop,
     reset,
+    reloadPlayerNotesFromRuntime,
     setCurrentIndex,
+    getPlayerCurrentIndex,
+    seekToIndex,
     getNotes,
+    getTimeMsForNoteIndex,
+    getNoteIndexForTimeMs,
     setupPlayerListeners,
     teardownPlayerListeners,
     isAccompanimentActive,

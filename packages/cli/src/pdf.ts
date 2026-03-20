@@ -131,41 +131,90 @@ export async function generatePdf(
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   };
   let execPath = process.env.PUPPETEER_EXECUTABLE_PATH;
-  if (!execPath && process.platform === 'win32') {
-    const candidates = [
-      'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-      'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
-    ];
-    for (const p of candidates) {
-      if (existsSync(p)) {
-        execPath = p;
-        break;
+  if (!execPath) {
+    if (process.platform === 'win32') {
+      const candidates = [
+        'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+        'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+      ];
+      for (const p of candidates) {
+        if (existsSync(p)) {
+          execPath = p;
+          break;
+        }
+      }
+    } else if (process.platform === 'darwin') {
+      // macOS Chrome 路径
+      const candidates = [
+        '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+        '/Applications/Chromium.app/Contents/MacOS/Chromium',
+      ];
+      for (const p of candidates) {
+        if (existsSync(p)) {
+          execPath = p;
+          break;
+        }
+      }
+    } else if (process.platform === 'linux') {
+      // Linux Chrome 路径
+      const candidates = [
+        '/usr/bin/google-chrome',
+        '/usr/bin/google-chrome-stable',
+        '/usr/bin/chromium',
+        '/usr/bin/chromium-browser',
+      ];
+      for (const p of candidates) {
+        if (existsSync(p)) {
+          execPath = p;
+          break;
+        }
       }
     }
   }
   if (execPath) {
     launchOptions.executablePath = execPath;
+  } else {
+    // 如果找不到系统 Chrome，尝试使用 Puppeteer 自带的浏览器
+    // 如果仍然失败，会抛出更清晰的错误信息
+    console.warn('未找到系统安装的 Chrome，尝试使用 Puppeteer 自带的浏览器...');
+    console.warn('提示：如果失败，请安装 Chrome 或设置环境变量 PUPPETEER_EXECUTABLE_PATH');
   }
-  const browser = await puppeteer.launch(launchOptions);
-
+  
   try {
-    const page = await browser.newPage();
-    await page.setViewport({ width: width + 100, height: 4000 });
-    await page.goto(`http://127.0.0.1:${port}/`, {
-      waitUntil: 'networkidle0',
-      timeout: 30000,
-    });
+    const browser = await puppeteer.launch(launchOptions);
 
-    await page.evaluate(() => document.fonts.ready);
+    try {
+      const page = await browser.newPage();
+      await page.setViewport({ width: width + 100, height: 4000 });
+      await page.goto(`http://127.0.0.1:${port}/`, {
+        waitUntil: 'networkidle0',
+        timeout: 30000,
+      });
 
-    await page.pdf({
-      path: outputPath,
-      format: 'a4',
-      printBackground: true,
-      margin: { top: '10mm', right: '10mm', bottom: '10mm', left: '10mm' },
-    });
-  } finally {
-    await browser.close();
+      await page.evaluate(() => document.fonts.ready);
+
+      await page.pdf({
+        path: outputPath,
+        format: 'a4',
+        printBackground: true,
+        margin: { top: '10mm', right: '10mm', bottom: '10mm', left: '10mm' },
+      });
+    } finally {
+      await browser.close();
+      server.close();
+    }
+  } catch (error) {
     server.close();
+    if (error instanceof Error && error.message.includes('Could not find Chrome')) {
+      throw new Error(
+        `无法找到 Chrome 浏览器。\n` +
+        `解决方案：\n` +
+        `1. 安装 Google Chrome: https://www.google.com/chrome/\n` +
+        `2. 或设置环境变量: export PUPPETEER_EXECUTABLE_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"\n` +
+        `3. 或安装 Puppeteer 浏览器: npx puppeteer browsers install chrome\n` +
+        `原始错误: ${error.message}`,
+      );
+    }
+    throw error;
   }
 }

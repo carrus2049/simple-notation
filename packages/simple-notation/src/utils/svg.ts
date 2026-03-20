@@ -68,12 +68,18 @@ export class SvgUtils {
       tspan.setAttribute('dx', `${options.dx || 0}`);
     if (options.dy !== undefined)
       tspan.setAttribute('dy', `${options.dy || 0}`);
-    tspan.setAttribute('font-size', `${options.fontSize || '14px'}`);
-    tspan.setAttribute('font-family', `${options.fontFamily || 'sans-serif'}`);
-    tspan.setAttribute('font-weight', `${options.fontWeight || 'normal'}`);
+    if (options.fontSize !== undefined)
+      tspan.setAttribute('font-size', `${options.fontSize}`);
+    if (options.fontFamily !== undefined)
+      tspan.setAttribute('font-family', `${options.fontFamily}`);
+    if (options.fontWeight !== undefined)
+      tspan.setAttribute('font-weight', `${options.fontWeight}`);
+    if (options.fill !== undefined) tspan.setAttribute('fill', `${options.fill}`);
     tspan.setAttribute('stroke', `${options.stroke || 'black'}`);
     tspan.setAttribute('stroke-width', `${options.strokeWidth || 0}`);
-    tspan.setAttribute('text-anchor', options.textAnchor || 'start');
+    // 勿默认写 text-anchor，否则会覆盖父 <text> 的 middle/end，导致多 tspan 歌词整体不居中
+    if (options.textAnchor !== undefined)
+      tspan.setAttribute('text-anchor', options.textAnchor);
     tspan.textContent = options.text || '';
     return tspan;
   }

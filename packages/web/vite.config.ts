@@ -30,4 +30,13 @@ export default defineConfig({
     // 排除 simple-notation，让它直接从源码加载以实现热重载
     exclude: ['simple-notation'],
   },
+  server: {
+    proxy: {
+      '/api/demo': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/demo/, ''),
+      },
+    },
+  },
 });

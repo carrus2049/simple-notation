@@ -15,6 +15,83 @@ import { SNChordLayer } from '@layers';
 import { SNPointerLayer } from '@layers';
 import { ChordTool } from '@utils';
 
+const LYRIC_FONT =
+  '"Microsoft YaHei", "微软雅黑", "PingFang SC", "Heiti SC", "WenQuanYi Micro Hei", sans-serif';
+const LYRIC_FONT_SIZE = 14;
+
+function lyricFillForStatus(st: string, colorMap: Record<string, string>): string {
+  if (st === 'extra_in_score') return colorMap.extra_in_score ?? '#2563eb';
+  if (st === 'diff') return colorMap.diff ?? '#ca8a04';
+  return '#000000';
+}
+
+function lyricSegmentsForLine(
+  line: string,
+  idxRef: { v: number },
+  statuses: string[],
+  colorMap: Record<string, string>,
+): { text: string; fill: string }[] {
+  const defaultFill = '#000000';
+  const segs: { text: string; fill: string }[] = [];
+  let curFill = defaultFill;
+  let buf = '';
+  const flush = () => {
+    if (!buf) return;
+    segs.push({ text: buf, fill: curFill });
+    buf = '';
+  };
+  for (const ch of line) {
+    if (ch === '-' || ch === ' ') {
+      if (curFill !== defaultFill) {
+        flush();
+        curFill = defaultFill;
+      }
+      buf += ch;
+      continue;
+    }
+    const st = statuses[idxRef.v++] ?? 'matched';
+    const f = lyricFillForStatus(st, colorMap);
+    if (f !== curFill) {
+      flush();
+      curFill = f;
+    }
+    buf += ch;
+  }
+  flush();
+  return segs.length ? segs : line ? [{ text: line, fill: defaultFill }] : [];
+}
+
+function appendLyricTextSegments(
+  parent: SVGGElement,
+  baseX: number,
+  baseY: number,
+  segments: { text: string; fill: string }[],
+) {
+  if (!segments.length) return;
+  const text = SvgUtils.createText({
+    x: baseX,
+    y: baseY,
+    text: '',
+    fontSize: LYRIC_FONT_SIZE,
+    fontFamily: LYRIC_FONT,
+    textAnchor: 'middle',
+    fill: '#000000',
+    stroke: 'none',
+    strokeWidth: 0,
+  });
+  for (const seg of segments) {
+    text.appendChild(
+      SvgUtils.createTspan({
+        fill: seg.fill,
+        text: seg.text,
+        stroke: 'none',
+        strokeWidth: 0,
+      }),
+    );
+  }
+  parent.appendChild(text);
+}
+
 /**
  * SNNote 类 - 简谱音符渲染组件
  *
@@ -801,31 +878,57 @@ export class SNNote extends SNBox {
           this.innerY +
           SNConfig.score.lineHeight +
           (SNConfig.score.scoreType === SNScoreType.Simple ? 18 : 38);
+        const paint = SNRuntime.lyricDiffPaint;
+        const usePaint =
+          !!paint &&
+          paint.mergedCharStatus.length > 0 &&
+          !!paint.colorMap;
         if (typeof word === 'string') {
           if (word === '-') return;
-          const text = SvgUtils.createText({
-            x: baseX,
-            y: baseY,
-            text: word,
-            fontSize: 14,
-            fontFamily: '"Microsoft YaHei", "微软雅黑", "PingFang SC", "Heiti SC", "WenQuanYi Micro Hei", sans-serif', 
-            textAnchor: 'middle',
-          });
-          this.el.appendChild(text);
-        } else if (Array.isArray(word)) {
-          // 多行歌词，竖直向下分行绘制，行间距为15
-          let drawIdx = 0;
-          word.forEach((line) => {
-            if (line === '-') return;
+          if (usePaint) {
+            const idxRef = { v: SNRuntime.scoreOffsetAtNoteStart(this.index) };
+            const segments = lyricSegmentsForLine(
+              word,
+              idxRef,
+              paint!.mergedCharStatus,
+              paint!.colorMap,
+            );
+            appendLyricTextSegments(this.el, baseX, baseY, segments);
+          } else {
             const text = SvgUtils.createText({
               x: baseX,
-              y: baseY + drawIdx * 15,
-              text: line,
-              fontSize: 14,
-              fontFamily: '"Microsoft YaHei", "微软雅黑", "PingFang SC", "Heiti SC", "WenQuanYi Micro Hei", sans-serif', 
+              y: baseY,
+              text: word,
+              fontSize: LYRIC_FONT_SIZE,
+              fontFamily: LYRIC_FONT,
               textAnchor: 'middle',
             });
             this.el.appendChild(text);
+          }
+        } else if (Array.isArray(word)) {
+          let drawIdx = 0;
+          const idxRef = { v: SNRuntime.scoreOffsetAtNoteStart(this.index) };
+          word.forEach((line) => {
+            if (line === '-') return;
+            if (usePaint) {
+              const segments = lyricSegmentsForLine(
+                line,
+                idxRef,
+                paint!.mergedCharStatus,
+                paint!.colorMap,
+              );
+              appendLyricTextSegments(this.el, baseX, baseY + drawIdx * 15, segments);
+            } else {
+              const text = SvgUtils.createText({
+                x: baseX,
+                y: baseY + drawIdx * 15,
+                text: line,
+                fontSize: LYRIC_FONT_SIZE,
+                fontFamily: LYRIC_FONT,
+                textAnchor: 'middle',
+              });
+              this.el.appendChild(text);
+            }
             drawIdx++;
           });
         }

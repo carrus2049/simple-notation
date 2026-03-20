@@ -63,6 +63,7 @@ export class SNLoader {
       splitLyrics,
       type: SNDataType.TEMPLATE,
     });
+    SNRuntime.lyricDiffPaint = data.lyricDiffPaint ?? null;
     // 再解析数据, 解析数据依赖运行时配置
     const { parsedScore } = new TemplateParser().parse(score);
     SNRuntime.parsedScore = parsedScore;

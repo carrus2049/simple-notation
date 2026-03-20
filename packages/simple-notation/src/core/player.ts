@@ -73,6 +73,19 @@ export class SNPlayer {
   }
 
   /**
+   * loadData 后 SNRuntime.parsedScore 已更新，但构造时缓存的音符队列不会自动刷新。
+   * 若不调用此方法，谱面渲染与 SNPlayer 内 notes 可能长度不一致，导致 seek 时间计算为 0。
+   */
+  public reloadNotesFromRuntime(): void {
+    const info = SNRuntime.info || {};
+    this.tempo = info.tempo ? parseInt(String(info.tempo), 10) : 60;
+    const parsedScore = SNRuntime.parsedScore || [];
+    this.notes = this.flattenNotes(parsedScore);
+    const maxIdx = Math.max(0, this.notes.length - 1);
+    this.setCurrentIndex(Math.min(this.currentIndex, maxIdx));
+  }
+
+  /**
    * 注册光标移动回调（每个音符都回调，包括'-'）
    * @param cb 回调函数，参数为当前播放的音符数据
    */
@@ -129,11 +142,23 @@ export class SNPlayer {
   }
 
   /**
+   * 当前播放位置（0-based 音符索引）
+   */
+  public getCurrentIndex(): number {
+    return this.currentIndex;
+  }
+
+  /**
    * 跳转到指定音符
    * @param index 设置当前播放index
    */
   public setCurrentIndex(index: number) {
     this.currentIndex = index;
+    let t = 0;
+    for (let i = 0; i < index && i < this.notes.length; i++) {
+      t += this.getNoteDuration(this.notes[i]);
+    }
+    this.currentTime = t;
   }
 
   /**
@@ -204,6 +229,48 @@ export class SNPlayer {
   }
 
   /**
+   * 判断当前音符是否在 tie 连音组内（由方括号 [ ] 连接的音符）
+   * 向前查找：若先遇到 isTieEnd 则不在组内，若先遇到 isTieStart 则在组内
+   */
+  private isInTieGroup(index: number): boolean {
+    let i = index - 1;
+    while (i >= 0) {
+      if (this.notes[i].note !== '-') {
+        if (this.notes[i].isTieEnd) return false;
+        if (this.notes[i].isTieStart) return true;
+      }
+      i--;
+    }
+    return false;
+  }
+
+  /**
+   * 判断 tie 连音线范围内的当前音符是否应播放
+   * 规则：仅对 tie 组内生效；pitch 不变则不播放后续音，pitch 变化则必须播放
+   * @param index 当前音符索引
+   * @returns 是否应触发 onNotePlay
+   */
+  private shouldPlayNoteInTie(index: number): boolean {
+    const note = this.notes[index];
+    if (!note || note.note === '-') return false;
+
+    // 不在 tie 组内：始终播放
+    if (!this.isInTieGroup(index) && !note.isTieStart) return true;
+
+    // tie 组内起始音：播放
+    if (note.isTieStart) return true;
+
+    // tie 组内非起始：向前找同组内前一个非延音音符，比较 pitch
+    let prevIdx = index - 1;
+    while (prevIdx >= 0 && this.notes[prevIdx].note === '-') prevIdx--;
+    if (prevIdx < 0) return true;
+
+    const prevNote = this.notes[prevIdx];
+    // pitch 变化则播放，不变则不播放
+    return !this.isNotePitchEqual(prevNote, note);
+  }
+
+  /**
    * 调度下一个音符的播放，支持延音线、连音线合并播放和小节循环（repeatStart/repeatEnd）
    * onPointerMove每个音符都回调，onNotePlay只在非'-'且非连音线中间音符时回调
    */
@@ -248,11 +315,15 @@ export class SNPlayer {
     const duration = this.getNoteDuration(note);
     this.currentTime += duration;
 
-    // 判断是否需要发声（非"-"，且不是tie的中间/结尾音符）
+    // 判断是否需要发声（非"-"）
+    // 连音线播放逻辑：pitch 不变则不播放后续音，pitch 变化则必须播放
     if (note.note !== '-') {
       let totalDuration = duration;
 
-      if (!note.isTieEnd) {
+      // 判断当前音符是否应播放：非 tie 结尾则播放；若是 tie 内音符，则需检查前一个 tie 内音符的 pitch
+      const shouldPlay = this.shouldPlayNoteInTie(this.currentIndex);
+
+      if (shouldPlay) {
         let idx = this.currentIndex + 1;
         while (
           idx < this.notes.length &&

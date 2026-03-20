@@ -7,6 +7,14 @@ export interface SNAbcData {
 }
 
 /**
+ * 歌词审核：与 strip 后合并串逐字对齐的状态，供谱面歌词上色（如谱面多出标蓝）。
+ */
+export interface SNLyricDiffPaint {
+  mergedCharStatus: string[];
+  colorMap: Record<string, string>;
+}
+
+/**
  * 用于渲染内容的数据类型，可以是模板对象、ABC 字符串或 ABC 对象。
  * @typedef {SNTemplate | string | SNAbcData} SNData
  */
@@ -17,11 +25,13 @@ export type SNData = SNTemplate | string | SNAbcData;
  * @property {SNDataInfo} info - 简谱基本信息。
  * @property {string} score - 乐谱内容。
  * @property {string} [lyric] - 歌词内容。
+ * @property {SNLyricDiffPaint} [lyricDiffPaint] - 可选，谱面歌词 diff 上色数据。
  */
 export interface SNTemplate {
   info: SNDataInfo;
   score: string;
   lyric?: string;
+  lyricDiffPaint?: SNLyricDiffPaint;
 }
 
 /**

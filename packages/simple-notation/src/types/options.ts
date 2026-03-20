@@ -51,6 +51,7 @@ export interface SNContentOptions {
  * @property {SNScoreType} scoreType - 总谱显示类型。
  * @property {boolean} showChordLine - 是否显示和弦线。
  * @property {number} chordLineHeight - 和弦线高度。
+ * @property {number} [pageContentHeightPx] - 单页谱面内容区高度（像素），用于分页；默认 1047（约 A4 扣 10mm 边距 @96dpi）。
  */
 export interface SNScoreOptions {
   padding: number | number[];
@@ -64,6 +65,7 @@ export interface SNScoreOptions {
   scoreType: SNScoreType;
   showChordLine: boolean;
   chordLineHeight: number;
+  pageContentHeightPx?: number;
 }
 
 export enum SNChordType {

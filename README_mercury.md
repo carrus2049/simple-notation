@@ -195,13 +195,27 @@ for (let i = 0; i < pageBreakYPositions.length - 1; i++) {
 pdf.save(`[SimpleNotation]${SNRuntime.info.title || '未命名曲谱'}.pdf`);
 ```
 
+
+### Build CLI工具
+在 simple-notation 根目录下进入 `packages/cli` 子目录，并运行 `npm run build` 构建 CLI 工具：
+
+```bash
+cd packages/cli
+npm run build
+```
+
+*构建完成后，`dist` 目录下会生成可用于 Node.js 执行的命令行入口文件。*
+
+
 ### 命令行批量渲染
 
 使用 CLI 的 `batch` 子命令可对 Kraken 生成的 output 目录进行批量 PDF 渲染：
 
+
 ```bash
 # 进入 simple-notation 根目录
 cd simple-notation
+
 
 # 批量渲染（data_dir 为包含 output 子目录的数据根目录）
 node packages/cli/dist/index.js batch C:\Data\melody_jianpu_notation_gen\batch_3
